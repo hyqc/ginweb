@@ -1,0 +1,7 @@
+server:
+  debug: true
+  port: 8888
+
+database:
+  mysql:
+    
