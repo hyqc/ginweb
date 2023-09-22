@@ -5,8 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	router2 "ginweb/application/router"
 	"ginweb/config"
-	"ginweb/router"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -47,6 +47,11 @@ func Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
+		err := config.AppLogger.Sync()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}()
 
 	parseCmd()
@@ -90,8 +95,8 @@ func runServe() {
 		gin.DisableConsoleColor()
 	}
 	e := gin.Default()
-	e.Use(router.Cors())
-	router.Routes(e)
+	e.Use(router2.Cors())
+	router2.Routes(e)
 
 	port := config.AppConfig.Server.Port
 	server.Addr = fmt.Sprintf(":%s", port)
@@ -125,5 +130,5 @@ func shutdown(ctx context.Context, ser *http.Server) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("server shutdown success")
+	fmt.Println("serves shutdown success")
 }

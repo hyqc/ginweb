@@ -1,7 +1,7 @@
 package router
 
 import (
-	"ginweb/controller"
+	"ginweb/application/controller"
 	"github.com/gin-gonic/gin"
 )
 

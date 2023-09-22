@@ -1,6 +1,6 @@
 package main
 
-import "ginweb/app"
+import "ginweb/serves"
 
 func main() {
 	app.Run()

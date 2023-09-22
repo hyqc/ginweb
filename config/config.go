@@ -1,6 +1,7 @@
 package config
 
 import (
+	"ginweb/pkg/logger"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 	"os"
@@ -18,6 +19,7 @@ type DB struct {
 var (
 	AppConfig = &Config{}
 	AppDB     = &DB{}
+	AppLogger = logger.NewLogger()
 )
 
 func ParseConfig(name string) error {
