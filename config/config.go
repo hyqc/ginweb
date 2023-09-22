@@ -1,7 +1,7 @@
 package config
 
 import (
-	"ginweb/pkg/logger"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 	"os"
@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Server   Server   `yaml:"server"`
 	Database Database `yaml:"database"`
+	Logger   Logger   `yaml:"logger"`
 }
 
 type DB struct {
@@ -19,7 +20,7 @@ type DB struct {
 var (
 	AppConfig = &Config{}
 	AppDB     = &DB{}
-	AppLogger = logger.NewLogger()
+	AppLogger *zap.Logger
 )
 
 func ParseConfig(name string) error {

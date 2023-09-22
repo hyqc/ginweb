@@ -7,8 +7,8 @@ import (
 	"fmt"
 	router2 "ginweb/application/router"
 	"ginweb/config"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -47,11 +47,7 @@ func Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
-		err := config.AppLogger.Sync()
-		if err != nil {
-			log.Println(err)
-			return
-		}
+		config.LoggerClose()
 	}()
 
 	parseCmd()
@@ -72,7 +68,7 @@ func parseCmd() {
 		os.Exit(0)
 		return
 	}
-	log.Println("parse cmd success")
+	fmt.Println("parse cmd success")
 }
 
 func parseConfig() {
@@ -81,11 +77,18 @@ func parseConfig() {
 		os.Exit(1)
 		return
 	}
-	log.Println("parse yaml config success")
+	fmt.Println("parse yaml config success")
 }
 
 func initConfig() {
-	log.Println("init config success")
+
+	if err := config.InitLogger(); err != nil {
+		fmt.Printf("init logger config error: %s\n", err.Error())
+		os.Exit(1)
+		return
+	}
+
+	fmt.Println("init config success")
 }
 
 func runServe() {
@@ -94,7 +97,13 @@ func runServe() {
 		gin.SetMode(gin.ReleaseMode)
 		gin.DisableConsoleColor()
 	}
+
 	e := gin.Default()
+
+	if config.AppConfig.Server.Pprof {
+		pprof.Register(e)
+	}
+
 	e.Use(router2.Cors())
 	router2.Routes(e)
 
@@ -102,16 +111,16 @@ func runServe() {
 	server.Addr = fmt.Sprintf(":%s", port)
 	server.Handler = e
 	go func() {
-		log.Println(fmt.Sprintf("start serve port: %s", port))
+		fmt.Println(fmt.Sprintf("start serve port: %s", port))
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("start serve port: %s, error: %s\n", port, err)
+			fmt.Printf("start serve port: %s, error: %s\n", port, err)
 			return
 		}
 	}()
 }
 
 func signalListen(ctx context.Context) {
-	log.Println("listen os signal...")
+	fmt.Println("listen os signal...")
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	run := true
 	for run {
@@ -121,7 +130,7 @@ func signalListen(ctx context.Context) {
 			shutdown(ctx, server)
 		}
 	}
-	log.Println("stop serve")
+	fmt.Println("stop serve")
 }
 
 func shutdown(ctx context.Context, ser *http.Server) {
